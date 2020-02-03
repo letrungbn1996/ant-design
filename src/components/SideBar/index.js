@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import { data } from '@/data/data';
-import { Menu, Button, Icon } from 'antd';
+import { Menu } from 'antd';
 import { SettingOutlined, CalendarOutlined } from '@ant-design/icons';
 import { router } from 'umi';
 import styles from '@/components/SideBar/index.less';
@@ -9,7 +8,6 @@ import styles from '@/components/SideBar/index.less';
 const { SubMenu } = Menu;
 
 export class SideBar extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -18,25 +16,21 @@ export class SideBar extends Component {
     };
   }
 
-  static getDerivedStateFromProps(props, state) {
-    const { location } = props;
+  static getDerivedStateFromProps(props) {
+    const { location, currentTab } = props;
     const { query } = location;
-    const { menuActive, tab } = query;
+    const { tab } = query;
     return {
-      currentMenu: menuActive,
+      currentMenu: currentTab,
       tab,
     };
   }
 
-
   changeUrl = item => {
-    const { location, changeTab } = this.props;
-    router.push(`?menuActive=${item.path}&&tab=${item.parentMenuId}`)
-    this.setState({
-      currentMenu: item.path,
-    })
+    const { changeTab } = this.props;
+    router.push(`?menuActive=${item.path}&&tab=${item.parentMenuId}`);
     changeTab(item.path);
-  }
+  };
 
   renderMenu = () => {
     const data2 = data.filter(item => item.parentMenuId === '4');
@@ -45,37 +39,40 @@ export class SideBar extends Component {
         key={item.menuId}
         title={
           <span>
-            { item.menuId === "1003" ? <SettingOutlined /> : <CalendarOutlined  /> }
+            {item.menuId === '1003' ? <SettingOutlined /> : <CalendarOutlined />}
             <span>{item.name}</span>
           </span>
         }
       >
-        { data.filter(i => i.parentMenuId === item.menuId).map(r => (
-          <Menu.Item key={r.path} onClick={() => this.changeUrl(r)}>{r.name}</Menu.Item>
-        ))}
+        {data
+          .filter(i => i.parentMenuId === item.menuId)
+          .map(r => (
+            <Menu.Item key={r.path} onClick={() => this.changeUrl(r)}>
+              {r.name}
+            </Menu.Item>
+          ))}
       </SubMenu>
-    ))
+    ));
     return result;
-  }
+  };
 
   render() {
     const { currentMenu, tab } = this.state;
     return (
-        <>
-            <Menu
-              mode="inline"
-              theme="dark"
-              className={styles['sidebar']}
-              onOpenChange={this.onOpenChange}
-              defaultSelectedKeys={[currentMenu]}
-              defaultOpenKeys={[tab]}
-            >
-              {this.renderMenu()}
-            </Menu>
-        </>
-      );
+      <>
+        <Menu
+          mode="inline"
+          theme="dark"
+          className={styles['sidebar-tab']}
+          onOpenChange={this.onOpenChange}
+          defaultSelectedKeys={[currentMenu]}
+          defaultOpenKeys={[tab]}
+        >
+          {this.renderMenu()}
+        </Menu>
+      </>
+    );
   }
 }
 
 export default SideBar;
-
