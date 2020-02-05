@@ -6,24 +6,25 @@ import { router } from 'umi';
 import styles from '@/components/SideBar/index.less';
 
 const { SubMenu } = Menu;
+const rootSubmenuKeys = ['1003', '4'];
 
 export class SideBar extends Component {
   constructor(props) {
     super(props);
     this.state = {
       currentMenu: '',
-      tab: '',
+      openKeys: ['1003'],
     };
   }
 
-  static getDerivedStateFromProps(props) {
-    const { location, currentTab } = props;
+  componentWillMount() {
+    const { location, currentTab } = this.props;
     const { query } = location;
     const { tab } = query;
-    return {
+    this.setState({
       currentMenu: currentTab,
-      tab,
-    };
+      openKeys: tab ? [tab] : ['1003'],
+    })
   }
 
   changeUrl = item => {
@@ -31,6 +32,18 @@ export class SideBar extends Component {
     router.push(`?menuActive=${item.path}&&tab=${item.parentMenuId}`);
     changeTab(item.path);
   };
+
+  onOpenChange = openKeys => {
+    const latestOpenKey = openKeys.find(key => this.state.openKeys.indexOf(key) === -1);
+    if (rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
+      const currentKeys = openKeys.filter(i => i === latestOpenKey);
+      this.setState({ openKeys: currentKeys });
+    } else {
+      this.setState({
+        openKeys: latestOpenKey ? [latestOpenKey] : [],
+      });
+    }
+  }
 
   renderMenu = () => {
     const data2 = data.filter(item => item.parentMenuId === '4');
@@ -57,7 +70,7 @@ export class SideBar extends Component {
   };
 
   render() {
-    const { currentMenu, tab } = this.state;
+    const { currentMenu } = this.state;
     return (
       <>
         <Menu
@@ -66,7 +79,7 @@ export class SideBar extends Component {
           className={styles['sidebar-tab']}
           onOpenChange={this.onOpenChange}
           defaultSelectedKeys={[currentMenu]}
-          defaultOpenKeys={[tab]}
+          openKeys={this.state.openKeys}
         >
           {this.renderMenu()}
         </Menu>
